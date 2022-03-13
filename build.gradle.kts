@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.6.10"
     id("org.jetbrains.compose") version "1.1.0"
+    id("com.squareup.sqldelight") version "1.5.3"
 }
 
 group = "com.github.pwoicik"
@@ -18,8 +19,7 @@ repositories {
 
 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 dependencies {
-    testImplementation(kotlin("test"))
-
+    // Compose
     implementation(compose.desktop.currentOs)
     implementation(compose.animation)
     implementation(compose.foundation)
@@ -30,6 +30,15 @@ dependencies {
     implementation(compose.uiTooling)
     implementation(compose.preview)
     implementation(compose.materialIconsExtended)
+
+    // Koin
+    implementation("io.insert-koin:koin-core:3.1.5")
+
+    // SqlDelight
+    implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
+    implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3")
+
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {
@@ -56,5 +65,11 @@ compose.desktop {
             packageName = "MRP_Project"
             packageVersion = "0.0.1"
         }
+    }
+}
+
+sqldelight {
+    database("MrpDatabase") {
+        packageName = "data"
     }
 }

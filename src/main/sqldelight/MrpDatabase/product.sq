@@ -1,0 +1,26 @@
+CREATE TABLE product (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    leadTime INTEGER NOT NULL,
+    batchSize INTEGER NOT NULL,
+    inStock INTEGER NOT NULL,
+    bom INTEGER NOT NULL,
+    parent INTEGER DEFAULT NULL REFERENCES product(id) ON DELETE SET NULL
+);
+
+getAllProducts:
+SELECT *
+FROM product;
+
+getAllTopLevelProducts:
+SELECT *
+FROM product
+WHERE parent IS NULL;
+
+insertProduct:
+INSERT INTO product(name, leadTime, batchSize, inStock, bom, parent)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateProduct:
+INSERT OR REPLACE INTO product
+VALUES ?;
