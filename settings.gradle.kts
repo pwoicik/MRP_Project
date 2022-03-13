@@ -7,4 +7,3 @@ pluginManagement {
     
 }
 rootProject.name = "MRP_Project"
-
