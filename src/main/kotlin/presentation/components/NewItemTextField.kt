@@ -14,20 +14,21 @@ import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun NewItemTextField(
+fun EditComponentTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    isNumeric: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    isNumeric: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = value,
+        isError = isError,
         onValueChange = {
             onValueChange(
-                if (isNumeric)
-                    it.replace("""\d""".toRegex(), "")
+                if (isNumeric) it.replace("""\D""".toRegex(), "")
                 else it
             )
         },
@@ -39,13 +40,18 @@ fun NewItemTextField(
             focusedLabelColor = MaterialTheme.colorScheme.tertiary,
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
-            focusedBorderColor = MaterialTheme.colorScheme.tertiary
+            focusedBorderColor = MaterialTheme.colorScheme.tertiary,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            errorCursorColor = MaterialTheme.colorScheme.error,
+            errorLabelColor = MaterialTheme.colorScheme.error
         ),
         modifier = Modifier
             .fillMaxWidth()
             .onKeyEvent { ev ->
                 if (ev.key == Key.Tab && ev.type == KeyEventType.KeyDown) {
-                    focusManager.moveFocus(FocusDirection.Next)
+                    focusManager.moveFocus(
+                        if (ev.isShiftPressed) FocusDirection.Previous else FocusDirection.Next
+                    )
                 }
                 true
             }.then(modifier)

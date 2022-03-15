@@ -31,6 +31,10 @@ dependencies {
     implementation(compose.preview)
     implementation(compose.materialIconsExtended)
 
+    // Decompose
+    implementation("com.arkivanov.decompose:decompose:0.5.2")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
+
     // Koin
     implementation("io.insert-koin:koin-core:3.1.5")
 
@@ -45,15 +49,10 @@ tasks.test {
     useJUnitPlatform()
 }
 
-val compilerArgs = listOfNotNull(
-    "-opt-in=kotlin.RequiresOptIn",
-    "-Xopt-in=kotlin.RequiresOptIn"
-)
-
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs = compilerArgs
+        freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 

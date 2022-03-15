@@ -1,0 +1,40 @@
+CREATE TABLE productEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    leadTime INTEGER NOT NULL,
+    batchSize INTEGER NOT NULL,
+    inStock INTEGER NOT NULL,
+    bom INTEGER NOT NULL,
+    parent INTEGER DEFAULT NULL REFERENCES productEntity(id) ON DELETE CASCADE
+);
+
+deleteProduct:
+DELETE FROM productEntity
+WHERE id = ?;
+
+getAllProducts:
+SELECT *
+FROM productEntity;
+
+getAllTopLevelProducts:
+SELECT *
+FROM productEntity
+WHERE parent IS NULL;
+
+getProduct:
+SELECT *
+FROM productEntity
+WHERE id = ?;
+
+getProductWithComponents:
+SELECT *
+FROM productEntity
+WHERE id = :id OR parent = :id;
+
+insertProduct:
+INSERT INTO productEntity(name, leadTime, batchSize, inStock, bom, parent)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateProduct:
+INSERT OR REPLACE INTO productEntity
+VALUES ?;
