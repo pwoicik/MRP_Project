@@ -8,26 +8,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import domain.model.ProductWithComponents
+import data.entity.ProductTree
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductScreen(
-    productWithComponentsStateFlow: StateFlow<ProductWithComponents?>,
+    productFlow: StateFlow<ProductTree?>,
     onEditProduct: () -> Unit,
     onDeleteProduct: () -> Unit,
     onGoBack: () -> Unit
 ) {
-    val productWithComponents by productWithComponentsStateFlow.collectAsState()
+    val product by productFlow.collectAsState()
 
     @Suppress("NAME_SHADOWING")
-    productWithComponents?.let { productWithComponents ->
-        val (product, components) = productWithComponents
+    product?.let { product ->
         Scaffold(
             topBar = {
                 SmallTopAppBar(
-                    title = { Text(product.name) },
+                    title = { Text(product.node.name) },
                     actions = {
                         IconButton(onClick = onEditProduct) {
                             Icon(

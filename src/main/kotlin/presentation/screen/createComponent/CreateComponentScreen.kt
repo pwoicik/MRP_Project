@@ -1,6 +1,5 @@
 package presentation.screen.createComponent
 
-import MrpApplication
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -8,38 +7,26 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import presentation.components.EditComponentTextField
+import presentation.navigation.NavController
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateComponentScreen(
     stateFlow: StateFlow<CreateComponentState>,
-    emit: (CreateComponentEvent) -> Unit
+    emit: (CreateComponentEvent) -> Unit,
+    navController: NavController
 ) {
     val state by stateFlow.collectAsState()
 
-    val scope = rememberCoroutineScope()
-
-    val onSubmit: () -> Unit = {
-        scope.launch {
-            MrpApplication().mrpRepository.insertProduct(
-                name = state.name,
-                leadTime = state.leadTime.toLong(),
-                batchSize = state.batchSize.toLong(),
-                inStock = state.inStock.toLong()
-            )
-            emit(CreateComponentEvent.GoBack)
-        }
+    val onSubmit = {
+        emit(CreateComponentEvent.SaveComponent)
+        navController.navigateUp()
     }
 
     Scaffold(
@@ -47,7 +34,7 @@ fun CreateComponentScreen(
             CenterAlignedTopAppBar(
                 title = { Text("Create a product") },
                 actions = {
-                    IconButton(onClick = { emit(CreateComponentEvent.GoBack) }) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Go back"
@@ -86,6 +73,7 @@ fun CreateComponentScreen(
                     value = state.name,
                     isError = state.name.isBlank(),
                     onValueChange = { emit(CreateComponentEvent.NameChanged(it)) },
+                    onSubmit = onSubmit,
                     label = "name",
                     modifier = Modifier.focusRequester(focusRequester)
                 )
@@ -93,6 +81,7 @@ fun CreateComponentScreen(
                     value = state.leadTime,
                     isError = state.leadTime.isBlank(),
                     onValueChange = { emit(CreateComponentEvent.LeadTimeChanged(it)) },
+                    onSubmit = onSubmit,
                     label = "lead time",
                     isNumeric = true
                 )
@@ -100,6 +89,7 @@ fun CreateComponentScreen(
                     value = state.batchSize,
                     isError = state.batchSize.isBlank(),
                     onValueChange = { emit(CreateComponentEvent.BatchSizeChanged(it)) },
+                    onSubmit = onSubmit,
                     label = "batch size",
                     isNumeric = true
                 )
@@ -107,14 +97,9 @@ fun CreateComponentScreen(
                     value = state.inStock,
                     isError = state.inStock.isBlank(),
                     onValueChange = { emit(CreateComponentEvent.InStockChanged(it)) },
+                    onSubmit = onSubmit,
                     label = "in stock",
-                    isNumeric = true,
-                    modifier = Modifier.onKeyEvent { ev ->
-                        if (ev.key == Key.Enter) {
-                            onSubmit()
-                        }
-                        true
-                    }
+                    isNumeric = true
                 )
             }
         }

@@ -7,12 +7,10 @@ import androidx.compose.ui.window.singleWindowApplication
 import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.mrpModule
-import kotlinx.coroutines.DelicateCoroutinesApi
 import org.koin.core.context.startKoin
-import presentation.navigation.NavHostComponent
+import presentation.navigation.NavHostViewModel
 import presentation.theme.MrpProjectTheme
 
-@OptIn(DelicateCoroutinesApi::class)
 fun main() {
     startKoin {
         modules(mrpModule)
@@ -26,7 +24,7 @@ fun main() {
             remember {
                 DefaultComponentContext(
                     LifecycleRegistry()
-                ).let(::NavHostComponent)
+                ).let(::NavHostViewModel)
             }.render()
         }
     }

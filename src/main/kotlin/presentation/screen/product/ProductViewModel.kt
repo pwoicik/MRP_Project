@@ -5,23 +5,23 @@ import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import presentation.navigation.Component
+import presentation.navigation.ViewModel
 import presentation.navigation.NavController
 import presentation.navigation.ScreenConfig
 
-class ProductComponent(
+class ProductViewModel(
     componentComponent: ComponentContext,
     config: ScreenConfig.Product,
     private val navController: NavController
-) : Component(componentComponent) {
+) : ViewModel(componentComponent) {
 
     private val productId = config.productId
 
-    private val productWithComponents = repository.getProductWithComponents(productId)
-        .stateIn(componentScope, SharingStarted.WhileSubscribed(), null)
+    private val product = repository.getProduct(productId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     private fun onDeleteProduct() {
-        componentScope.launch {
+        viewModelScope.launch {
             repository.deleteProduct(productId)
             navController.navigateUp()
         }
@@ -30,10 +30,10 @@ class ProductComponent(
     @Composable
     override fun render() {
         ProductScreen(
-            productWithComponentsStateFlow = productWithComponents,
+            productFlow = product,
             onGoBack = navController::navigateUp,
             onDeleteProduct = ::onDeleteProduct,
-            onEditProduct = { navController.navigate(ScreenConfig.CreateComponent(productId = productId)) }
+            onEditProduct = { navController.navigate(ScreenConfig.CreateComponent(productId)) }
         )
     }
 }

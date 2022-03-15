@@ -6,6 +6,5 @@ sealed class CreateComponentEvent {
     data class BatchSizeChanged(val batchSize: String) : CreateComponentEvent()
     data class InStockChanged(val inStock: String) : CreateComponentEvent()
 
-    object GoBack : CreateComponentEvent()
     object SaveComponent : CreateComponentEvent()
 }

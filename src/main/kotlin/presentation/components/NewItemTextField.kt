@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 fun EditComponentTextField(
     value: String,
     onValueChange: (String) -> Unit,
+    onSubmit: () -> Unit,
     label: String,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
@@ -48,10 +49,16 @@ fun EditComponentTextField(
         modifier = Modifier
             .fillMaxWidth()
             .onKeyEvent { ev ->
-                if (ev.key == Key.Tab && ev.type == KeyEventType.KeyDown) {
-                    focusManager.moveFocus(
-                        if (ev.isShiftPressed) FocusDirection.Previous else FocusDirection.Next
-                    )
+                if (ev.type != KeyEventType.KeyDown) return@onKeyEvent true
+                when (ev.key) {
+                    Key.Tab -> {
+                        focusManager.moveFocus(
+                            if (ev.isShiftPressed) FocusDirection.Previous else FocusDirection.Next
+                        )
+                    }
+                    Key.Enter -> {
+                        onSubmit()
+                    }
                 }
                 true
             }.then(modifier)

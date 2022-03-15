@@ -5,8 +5,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -14,14 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import domain.model.Product
+import data.entity.ProductTree
 
 @Composable
 fun ProductsTableItem(
-    product: Product,
-    onEditProductClick: (Product) -> Unit,
-    onAddComponentClick: (Product) -> Unit,
-    onGoToProductClick: (Product) -> Unit
+    product: ProductTree,
+    onEditProductClick: (ProductTree) -> Unit,
+    onAddComponentClick: (ProductTree) -> Unit,
+    onGoToProductClick: (ProductTree) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -33,14 +33,15 @@ fun ProductsTableItem(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            ProductsTableText(product.name, tonalElevation = 1.dp)
-            ProductsTableText(product.leadTime.toString())
-            ProductsTableText(product.batchSize.toString(), tonalElevation = 1.dp)
-            ProductsTableText(product.inStock.toString())
+            val productNode = product.node
+            ProductsTableText(productNode.name, tonalElevation = 1.dp)
+            ProductsTableText(productNode.leadTime.toString())
+            ProductsTableText(productNode.batchSize.toString(), tonalElevation = 1.dp)
+            ProductsTableText(productNode.inStock.toString())
 
             TableItemActions(
                 onEditProductClick = { onEditProductClick(product) },
-                onAddComponentClick = { onAddComponentClick(product) },
+                onDeleteProductClick = { onAddComponentClick(product) },
                 onGoToProductClick = { onGoToProductClick(product) }
             )
         }
@@ -50,7 +51,7 @@ fun ProductsTableItem(
 @Composable
 fun RowScope.TableItemActions(
     onEditProductClick: () -> Unit,
-    onAddComponentClick: () -> Unit,
+    onDeleteProductClick: () -> Unit,
     onGoToProductClick: () -> Unit
 ) {
     Surface(
@@ -68,9 +69,9 @@ fun RowScope.TableItemActions(
                 contentDescription = "Edit product"
             )
             ProductsTableActionButton(
-                onClick = onAddComponentClick,
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add component"
+                onClick = onDeleteProductClick,
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete product"
             )
             ProductsTableActionButton(
                 onClick = onGoToProductClick,

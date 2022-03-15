@@ -7,11 +7,11 @@ import com.arkivanov.essenty.lifecycle.subscribe
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
-abstract class Component(
+abstract class ViewModel(
     componentContext: ComponentContext
 ) : ComponentContext by componentContext {
 
-    protected val componentScope = MainScope()
+    protected val viewModelScope = MainScope()
 
     @Composable
     abstract fun render()
@@ -22,7 +22,7 @@ abstract class Component(
 
     private fun subscribeOnDestroy() {
         lifecycle.subscribe(
-            onDestroy = { componentScope.cancel() }
+            onDestroy = { viewModelScope.cancel() }
         )
     }
 

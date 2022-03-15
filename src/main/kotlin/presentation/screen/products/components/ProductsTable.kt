@@ -14,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import domain.model.Product
+import data.entity.ProductTree
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProductsTable(
-    products: List<Product>,
-    onEditProductClick: (Product) -> Unit,
-    onAddComponentClick: (Product) -> Unit,
-    onGoToProductClick: (Product) -> Unit,
+    products: List<ProductTree>,
+    onEditProductClick: (ProductTree) -> Unit,
+    onDeleteProductClick: (ProductTree) -> Unit,
+    onGoToProductClick: (ProductTree) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -34,7 +34,7 @@ fun ProductsTable(
             ProductsTableItem(
                 product = product,
                 onEditProductClick = onEditProductClick,
-                onAddComponentClick = onAddComponentClick,
+                onAddComponentClick = onDeleteProductClick,
                 onGoToProductClick = onGoToProductClick
             )
         }
