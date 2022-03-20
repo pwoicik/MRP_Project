@@ -9,24 +9,11 @@ import domain.repository.MrpRepository
 import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import java.io.File
-import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.createDirectory
 
 val mrpModule = module {
     single {
-        val dbFile = Path(System.getProperty("user.home"), "AppData", "Roaming", "MRP_Project")
-            .run {
-                try {
-                    createDirectory()
-                } catch (_: Exception) {}
-                File(absolutePathString(), "db.db")
-            }
-        val driver = JdbcSqliteDriver(url = "jdbc:sqlite:${dbFile.absolutePath}")
-        if (!dbFile.exists()) {
-            MrpDatabase.Schema.create(driver)
-        }
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        MrpDatabase.Schema.create(driver)
         MrpDatabase(
             driver = driver,
             productTreeAdapter = ProductTree.Adapter(

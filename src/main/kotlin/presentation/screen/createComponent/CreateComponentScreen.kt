@@ -11,21 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.StateFlow
 import presentation.components.EditComponentTextField
 import presentation.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateComponentScreen(
-    stateFlow: StateFlow<CreateComponentState>,
-    emit: (CreateComponentEvent) -> Unit,
+    viewModel: CreateComponentViewModel,
     navController: NavController
 ) {
-    val state by stateFlow.collectAsState()
+    val state by viewModel.state.collectAsState()
 
     val onSubmit = {
-        emit(CreateComponentEvent.SaveComponent)
+        viewModel.emit(CreateComponentEvent.SaveComponent)
         navController.navigateUp()
     }
 
@@ -72,7 +70,7 @@ fun CreateComponentScreen(
                 EditComponentTextField(
                     value = state.name,
                     isError = state.name.isBlank(),
-                    onValueChange = { emit(CreateComponentEvent.NameChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.NameChanged(it)) },
                     onSubmit = onSubmit,
                     label = "name",
                     modifier = Modifier.focusRequester(focusRequester)
@@ -80,7 +78,7 @@ fun CreateComponentScreen(
                 EditComponentTextField(
                     value = state.leadTime,
                     isError = state.leadTime.isBlank(),
-                    onValueChange = { emit(CreateComponentEvent.LeadTimeChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.LeadTimeChanged(it)) },
                     onSubmit = onSubmit,
                     label = "lead time",
                     isNumeric = true
@@ -88,7 +86,7 @@ fun CreateComponentScreen(
                 EditComponentTextField(
                     value = state.batchSize,
                     isError = state.batchSize.isBlank(),
-                    onValueChange = { emit(CreateComponentEvent.BatchSizeChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.BatchSizeChanged(it)) },
                     onSubmit = onSubmit,
                     label = "batch size",
                     isNumeric = true
@@ -96,7 +94,7 @@ fun CreateComponentScreen(
                 EditComponentTextField(
                     value = state.inStock,
                     isError = state.inStock.isBlank(),
-                    onValueChange = { emit(CreateComponentEvent.InStockChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.InStockChanged(it)) },
                     onSubmit = onSubmit,
                     label = "in stock",
                     isNumeric = true

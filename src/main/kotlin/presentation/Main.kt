@@ -8,7 +8,7 @@ import com.arkivanov.decompose.DefaultComponentContext
 import com.arkivanov.essenty.lifecycle.LifecycleRegistry
 import di.mrpModule
 import org.koin.core.context.startKoin
-import presentation.navigation.NavHostViewModel
+import presentation.navigation.NavHost
 import presentation.theme.MrpProjectTheme
 
 fun main() {
@@ -24,7 +24,7 @@ fun main() {
             remember {
                 DefaultComponentContext(
                     LifecycleRegistry()
-                ).let(::NavHostViewModel)
+                ).let(::NavHost)
             }.render()
         }
     }

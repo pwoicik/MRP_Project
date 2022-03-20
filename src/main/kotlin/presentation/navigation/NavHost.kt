@@ -11,15 +11,14 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.cros
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.router
 import presentation.screen.createComponent.CreateComponentViewModel
-import presentation.screen.product.ProductViewModel
-import presentation.screen.products.ProductsViewModel
+import presentation.screen.main.MainViewModel
 
-class NavHostViewModel(
+class NavHost(
     componentContext: ComponentContext
 ) : ViewModel(componentContext) {
 
     private val router = router<ScreenConfig, ViewModel>(
-        initialConfiguration = ScreenConfig.Products,
+        initialConfiguration = ScreenConfig.Main,
         childFactory = ::createScreenComponent
     )
 
@@ -44,13 +43,8 @@ class NavHostViewModel(
         screenConfig: ScreenConfig,
         componentContext: ComponentContext
     ) = when (screenConfig) {
-        ScreenConfig.Products -> ProductsViewModel(
+        ScreenConfig.Main -> MainViewModel(
             componentContext = componentContext,
-            navController = navController
-        )
-        is ScreenConfig.Product -> ProductViewModel(
-            componentComponent = componentContext,
-            config = screenConfig,
             navController = navController
         )
         is ScreenConfig.CreateComponent -> CreateComponentViewModel(

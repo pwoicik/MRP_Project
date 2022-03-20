@@ -20,7 +20,7 @@ class CreateComponentViewModel(
 ) : ViewModel(componentContext) {
 
     private val _state = MutableStateFlow(CreateComponentState())
-    private val state = _state.asStateFlow()
+    val state = _state.asStateFlow()
 
     private lateinit var product: ProductTree
 
@@ -41,7 +41,7 @@ class CreateComponentViewModel(
         }
     }
 
-    private fun emit(event: CreateComponentEvent) {
+    fun emit(event: CreateComponentEvent) {
         when (event) {
             is CreateComponentEvent.BatchSizeChanged -> {
                 _state.update { state ->
@@ -70,17 +70,17 @@ class CreateComponentViewModel(
                         repository.insertProduct(
                             MutableProductTreeNode(
                                 name = it.name,
-                                leadTime = it.leadTime.toInt(),
-                                batchSize = it.batchSize.toInt(),
-                                inStock = it.inStock.toInt()
+                                leadTime = it.leadTime.toLong(),
+                                batchSize = it.batchSize.toLong(),
+                                inStock = it.inStock.toLong()
                             )
                         )
                     } else {
                         product.node.apply {
                             name = it.name
-                            leadTime = it.leadTime.toInt()
-                            batchSize = it.batchSize.toInt()
-                            inStock = it.inStock.toInt()
+                            leadTime = it.leadTime.toLong()
+                            batchSize = it.batchSize.toLong()
+                            inStock = it.inStock.toLong()
                         }
                         repository.updateProduct(product)
                     }
@@ -94,8 +94,7 @@ class CreateComponentViewModel(
     @Composable
     override fun render() {
         CreateComponentScreen(
-            stateFlow = state,
-            emit = ::emit,
+            viewModel = this,
             navController = navController
         )
     }

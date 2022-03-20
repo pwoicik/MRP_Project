@@ -5,9 +5,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MutableProductTreeNode(
     var name: String,
-    var leadTime: Int,
-    var batchSize: Int,
-    var inStock: Int,
-    var bom: Int = 0,
+    var leadTime: Long,
+    var inStock: Long,
+    var batchSize: Long = 0,
+    var bom: Long = 0,
+    var requiredAmount: Long = 1,
     val components: MutableList<MutableProductTreeNode> = mutableListOf()
 )

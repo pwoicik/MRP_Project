@@ -12,7 +12,8 @@ WHERE id = ?;
 
 getAllProducts:
 SELECT *
-FROM productTree;
+FROM productTree
+ORDER BY id DESC;
 
 getProduct:
 SELECT *
