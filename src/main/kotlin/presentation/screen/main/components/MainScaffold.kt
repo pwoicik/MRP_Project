@@ -1,11 +1,17 @@
 package presentation.screen.main.components
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import presentation.components.TopBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -14,22 +20,17 @@ fun MainScaffold(
 ) {
     Scaffold(
         topBar = {
-            Surface(
+            TopBar(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shadowElevation = 2.dp,
-                color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 20.dp)
-                ) {
-                    Text(
-                        text = "MRP Project",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
+                Text(
+                    text = "MRP Project",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+
             }
         }
     ) { innerPadding ->

@@ -30,7 +30,8 @@ import presentation.screen.main.fragments.MainFragment
 fun RowScope.DetailsFragment(
     product: ProductTree?,
     onEditProduct: (ProductTree) -> Unit,
-    onDeleteProduct: (ProductTree) -> Unit
+    onDeleteProduct: (ProductTree) -> Unit,
+    onRunMrp: (ProductTree) -> Unit
 ) {
     MainFragment {
         Crossfade(product) { product ->
@@ -62,7 +63,7 @@ fun RowScope.DetailsFragment(
                                 icon = Icons.Default.PlayArrow,
                                 size = 30.dp,
                                 tint = Color.Green.copy(alpha = 0.8f),
-                                onClick = { /* TODO mrp algorithm */ }
+                                onClick = { onRunMrp(product) }
                             )
                         }
                     )

@@ -12,6 +12,7 @@ import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.router
 import presentation.screen.createComponent.CreateComponentViewModel
 import presentation.screen.main.MainViewModel
+import presentation.screen.mrp.MrpViewModel
 
 class NavHost(
     componentContext: ComponentContext
@@ -48,6 +49,11 @@ class NavHost(
             navController = navController
         )
         is ScreenConfig.CreateComponent -> CreateComponentViewModel(
+            componentContext = componentContext,
+            config = screenConfig,
+            navController = navController
+        )
+        is ScreenConfig.Mrp -> MrpViewModel(
             componentContext = componentContext,
             config = screenConfig,
             navController = navController

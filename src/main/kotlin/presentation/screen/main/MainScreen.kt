@@ -33,8 +33,9 @@ fun MainScreen(
         )
         DetailsFragment(
             product = state.selectedProduct,
-            onEditProduct = { navController.navigate(ScreenConfig.CreateComponent(productId = it.id)) },
-            onDeleteProduct = { viewModel.emit(MainScreenEvent.DeleteProduct(it)) }
+            onEditProduct = { navController.navigate(ScreenConfig.CreateComponent(it.id)) },
+            onDeleteProduct = { viewModel.emit(MainScreenEvent.DeleteProduct(it)) },
+            onRunMrp = { navController.navigate(ScreenConfig.Mrp(it.id)) }
         )
     }
 }
