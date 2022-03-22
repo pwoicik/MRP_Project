@@ -29,7 +29,7 @@ fun MrpScreen(
                             contentDescription = null
                         )
                     }
-                    Text("akurwachuj")
+                    Text("Placeholder")
                     IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
