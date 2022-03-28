@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm") version "1.6.10"
     kotlin("plugin.serialization") version "1.6.10"
 
-    id("org.jetbrains.compose") version "1.1.0"
+    id("org.jetbrains.compose") version "1.1.1"
     id("com.squareup.sqldelight") version "1.5.3"
 }
 
@@ -32,6 +32,8 @@ dependencies {
     implementation(compose.uiTooling)
     implementation(compose.preview)
     implementation(compose.materialIconsExtended)
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.0")
 
     // Decompose
     implementation("com.arkivanov.decompose:decompose:0.5.2")

@@ -1,6 +1,6 @@
-package presentation.screen.createComponent
+package presentation.screen.createProduct
 
-data class CreateComponentState(
+data class CreateProductState(
     val name: String = "",
     val leadTime: String = "",
     val batchSize: String = "",

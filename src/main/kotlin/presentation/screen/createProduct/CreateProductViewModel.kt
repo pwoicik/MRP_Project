@@ -1,4 +1,4 @@
-package presentation.screen.createComponent
+package presentation.screen.createProduct
 
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
@@ -13,14 +13,16 @@ import presentation.navigation.ViewModel
 import presentation.navigation.NavController
 import presentation.navigation.ScreenConfig
 
-class CreateComponentViewModel(
+class CreateProductViewModel(
     componentContext: ComponentContext,
-    private val config: ScreenConfig.CreateComponent,
+    private val config: ScreenConfig.CreateProduct,
     private val navController: NavController
 ) : ViewModel(componentContext) {
 
-    private val _state = MutableStateFlow(CreateComponentState())
+    private val _state = MutableStateFlow(CreateProductState())
     val state = _state.asStateFlow()
+
+    val isEditMode = config.productId != null
 
     private lateinit var product: ProductTree
 
@@ -30,7 +32,7 @@ class CreateComponentViewModel(
                 product = repository.getProduct(config.productId).first()
                 _state.update {
                     val product = product.node
-                    CreateComponentState(
+                    CreateProductState(
                         name = product.name,
                         leadTime = product.leadTime.toString(),
                         batchSize = product.batchSize.toString(),
@@ -41,29 +43,29 @@ class CreateComponentViewModel(
         }
     }
 
-    fun emit(event: CreateComponentEvent) {
+    fun emit(event: CreateProductEvent) {
         when (event) {
-            is CreateComponentEvent.BatchSizeChanged -> {
+            is CreateProductEvent.BatchSizeChanged -> {
                 _state.update { state ->
                     state.copy(batchSize = event.batchSize.toDigitsOnly())
                 }
             }
-            is CreateComponentEvent.InStockChanged -> {
+            is CreateProductEvent.InStockChanged -> {
                 _state.update { state ->
                     state.copy(inStock = event.inStock.toDigitsOnly())
                 }
             }
-            is CreateComponentEvent.LeadTimeChanged -> {
+            is CreateProductEvent.LeadTimeChanged -> {
                 _state.update { state ->
                     state.copy(leadTime = event.leadTime.toDigitsOnly())
                 }
             }
-            is CreateComponentEvent.NameChanged -> {
+            is CreateProductEvent.NameChanged -> {
                 _state.update { state ->
                     state.copy(name = event.name)
                 }
             }
-            CreateComponentEvent.SaveComponent -> viewModelScope.launch {
+            CreateProductEvent.SaveProduct -> viewModelScope.launch {
                 state.value.let {
                     if (!it.isInputValid) return@launch
                     if (config.productId == null) {
@@ -93,7 +95,7 @@ class CreateComponentViewModel(
 
     @Composable
     override fun render() {
-        CreateComponentScreen(
+        CreateProductScreen(
             viewModel = this,
             navController = navController
         )
