@@ -2,7 +2,6 @@ package presentation.util
 
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.unit.Density
-import java.io.FileNotFoundException
 import kotlin.io.path.Path
 import kotlin.io.path.inputStream
 
@@ -16,6 +15,6 @@ fun getAppIcon() = try {
         ).inputStream(),
         density = Density(1f)
     )
-} catch (_: FileNotFoundException) {
+} catch (_: Exception) {
     null
 }
