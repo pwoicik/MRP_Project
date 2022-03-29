@@ -1,0 +1,35 @@
+import kotlin.collections.List;
+import domain.model.Component;
+
+CREATE TABLE productEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    leadTime INTEGER NOT NULL,
+    inStock INTEGER NOT NULL,
+    components TEXT AS List<Component> NOT NULL
+);
+
+deleteProduct:
+DELETE
+FROM productEntity
+WHERE id = ?;
+
+getAllProducts:
+SELECT *
+FROM productEntity
+ORDER BY id DESC;
+
+getProduct:
+SELECT *
+FROM productEntity
+WHERE id = ?;
+
+insertProduct:
+INSERT
+INTO productEntity(name, leadTime, inStock, components)
+VALUES (?, ?, ?, ?);
+
+updateProduct:
+INSERT OR REPLACE
+INTO productEntity
+VALUES ?;

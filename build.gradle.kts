@@ -4,7 +4,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.compose") version "1.1.0"
+    kotlin("plugin.serialization") version "1.6.10"
+
+    id("org.jetbrains.compose") version "1.1.1"
     id("com.squareup.sqldelight") version "1.5.3"
 }
 
@@ -31,12 +33,21 @@ dependencies {
     implementation(compose.preview)
     implementation(compose.materialIconsExtended)
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.6.0")
+
+    // Decompose
+    implementation("com.arkivanov.decompose:decompose:0.5.2")
+    implementation("com.arkivanov.decompose:extensions-compose-jetbrains:0.5.2")
+
     // Koin
     implementation("io.insert-koin:koin-core:3.1.5")
 
     // SqlDelight
     implementation("com.squareup.sqldelight:sqlite-driver:1.5.3")
     implementation("com.squareup.sqldelight:coroutines-extensions-jvm:1.5.3")
+
+    // JSON serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
     testImplementation(kotlin("test"))
 }
@@ -45,25 +56,30 @@ tasks.test {
     useJUnitPlatform()
 }
 
-val compilerArgs = listOfNotNull(
-    "-opt-in=kotlin.RequiresOptIn",
-    "-Xopt-in=kotlin.RequiresOptIn"
-)
-
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "11"
-        freeCompilerArgs = compilerArgs
+        freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "presentation.MainKt"
+
         nativeDistributions {
+            modules("java.sql")
+
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+
             targetFormats(TargetFormat.Msi)
-            packageName = "MRP_Project"
-            packageVersion = "0.0.1"
+            packageName = "MRP Project"
+            packageVersion = "0.0.2"
+
+            windows {
+                iconFile.set(project.layout.projectDirectory.dir("icons").file("icon.ico"))
+                menuGroup = "MRP Project"
+            }
         }
     }
 }

@@ -1,23 +1,18 @@
 package domain.repository
 
-import MrpDatabase.Product
+import data.entity.ProductEntity
+import domain.model.Component
 import kotlinx.coroutines.flow.Flow
 
 interface MrpRepository {
 
-    fun getAllProducts(): Flow<List<Product>>
+    suspend fun deleteProduct(productId: Long)
 
-    fun getAllTopLevelProducts(): Flow<List<Product>>
+    fun getAllProducts(): Flow<List<ProductEntity>>
 
-    suspend fun insertProduct(product: Product)
+    fun getProduct(productId: Long): Flow<ProductEntity>
 
-    suspend fun insertProduct(
-        name: String,
-        leadTime: Long,
-        batchSize: Long,
-        inStock: Long,
-        bom: Long = 0,
-        parent: Long? = null,
-        id: Long? = null
-    )
+    suspend fun insertProduct(name: String, leadTime: Long, inStock: Long, components: List<Component> = emptyList())
+
+    suspend fun updateProduct(productTree: ProductEntity)
 }
