@@ -2,8 +2,8 @@ package di
 
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import data.MrpDatabase
-import data.adapters.mutableProductTreeNodeAdapter
-import data.entity.ProductTree
+import data.adapters.ComponentListAdapter
+import data.entity.ProductEntity
 import data.repository.MrpRepositoryImpl
 import domain.repository.MrpRepository
 import kotlinx.coroutines.Dispatchers
@@ -16,8 +16,8 @@ val mrpModule = module {
         MrpDatabase.Schema.create(driver)
         MrpDatabase(
             driver = driver,
-            productTreeAdapter = ProductTree.Adapter(
-                nodeAdapter = mutableProductTreeNodeAdapter
+            productEntityAdapter = ProductEntity.Adapter(
+                componentsAdapter = ComponentListAdapter
             )
         )
     }

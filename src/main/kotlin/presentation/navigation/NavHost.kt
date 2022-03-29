@@ -10,6 +10,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.animation.child.crossfade
 import com.arkivanov.decompose.router.pop
 import com.arkivanov.decompose.router.router
+import presentation.screen.createComponent.CreateComponentViewModel
 import presentation.screen.createProduct.CreateProductViewModel
 import presentation.screen.main.MainViewModel
 import presentation.screen.mrp.MrpViewModel
@@ -49,6 +50,11 @@ class NavHost(
             navController = navController
         )
         is ScreenConfig.CreateProduct -> CreateProductViewModel(
+            componentContext = componentContext,
+            config = screenConfig,
+            navController = navController
+        )
+        is ScreenConfig.CreateComponent -> CreateComponentViewModel(
             componentContext = componentContext,
             config = screenConfig,
             navController = navController

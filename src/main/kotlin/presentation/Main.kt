@@ -10,6 +10,7 @@ import di.mrpModule
 import org.koin.core.context.startKoin
 import presentation.navigation.NavHost
 import presentation.theme.MrpProjectTheme
+import presentation.util.getAppIcon
 
 fun main() {
     startKoin {
@@ -18,7 +19,8 @@ fun main() {
 
     singleWindowApplication(
         state = WindowState(placement = WindowPlacement.Maximized),
-        title = "MRP Project"
+        title = "MRP Project",
+        icon = getAppIcon()
     ) {
         MrpProjectTheme {
             remember {

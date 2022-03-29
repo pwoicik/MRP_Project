@@ -65,11 +65,21 @@ tasks.withType<KotlinCompile> {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "presentation.MainKt"
+
         nativeDistributions {
+            modules("java.sql")
+
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+
             targetFormats(TargetFormat.Msi)
-            packageName = "MRP_Project"
-            packageVersion = "0.0.1"
+            packageName = "MRP Project"
+            packageVersion = "0.0.2"
+
+            windows {
+                iconFile.set(project.layout.projectDirectory.dir("icons").file("icon.ico"))
+                menuGroup = "MRP Project"
+            }
         }
     }
 }

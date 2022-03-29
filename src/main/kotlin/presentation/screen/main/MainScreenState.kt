@@ -1,8 +1,13 @@
 package presentation.screen.main
 
-import data.entity.ProductTree
+import data.entity.ProductEntity
 
 data class MainScreenState(
-    val products: List<ProductTree>? = null,
-    val selectedProduct: ProductTree? = null
-)
+
+    val products: List<ProductEntity>? = null,
+    val selectedProductId: Long? = null
+) {
+
+    val selectedProduct: ProductEntity?
+        get() = products?.find { it.id == selectedProductId }
+}

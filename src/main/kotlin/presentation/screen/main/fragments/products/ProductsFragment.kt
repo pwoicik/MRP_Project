@@ -13,17 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIconDefaults
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import data.entity.ProductTree
+import data.entity.ProductEntity
 import presentation.screen.main.components.MainFragmentTopBar
 import presentation.screen.main.fragments.MainFragment
-import presentation.screen.main.components.ComponentCard
+import presentation.screen.main.components.ProductCard
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RowScope.ProductsFragment(
-    products: List<ProductTree>?,
+    products: List<ProductEntity>?,
     onAddProductClick: () -> Unit,
-    onProductClick: (ProductTree) -> Unit
+    onProductClick: (ProductEntity) -> Unit
 ) {
     MainFragment {
         MainFragmentTopBar(
@@ -54,8 +54,8 @@ fun RowScope.ProductsFragment(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(products) { product ->
-                            ComponentCard(
-                                component = product.node,
+                            ProductCard(
+                                product = product,
                                 onClick = { onProductClick(product) }
                             )
                         }

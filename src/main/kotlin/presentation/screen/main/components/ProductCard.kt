@@ -14,14 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIconDefaults
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
-import domain.model.MutableProductTreeNode
+import data.entity.ProductEntity
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ComponentCard(
-    component: MutableProductTreeNode,
-    onClick: (() -> Unit)? = null,
-    showRequiredAmount: Boolean = false
+fun ProductCard(
+    product: ProductEntity,
+    onClick: (() -> Unit)? = null
 ) {
     val surface = @Composable { content: @Composable () -> Unit ->
         if (onClick != null) {
@@ -56,7 +55,7 @@ fun ComponentCard(
                     .padding(start = 24.dp, end = 18.dp)
             ) {
                 Text(
-                    text = component.name,
+                    text = product.name,
                     style = MaterialTheme.typography.titleMedium
                 )
                 if (onClick != null) {
@@ -72,23 +71,13 @@ fun ComponentCard(
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
             ) {
-                if (showRequiredAmount) {
-                    ComponentDetail(
-                        detail = "ilość",
-                        value = component.requiredAmount
-                    )
-                }
                 ComponentDetail(
                     detail = "czas produkcji",
-                    value = component.leadTime
+                    value = product.leadTime
                 )
                 ComponentDetail(
                     detail = "na stanie",
-                    value = component.inStock
-                )
-                ComponentDetail(
-                    detail = "rozmiar partii",
-                    value = component.batchSize
+                    value = product.inStock
                 )
             }
         }

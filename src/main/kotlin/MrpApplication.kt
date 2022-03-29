@@ -1,4 +1,4 @@
-import domain.model.MutableProductTreeNode
+import domain.model.Component
 import domain.repository.MrpRepository
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -18,95 +18,75 @@ class MrpApplication : KoinComponent {
     private fun populateDatabase() {
         GlobalScope.launch {
             mrpRepository.insertProduct(
-                MutableProductTreeNode(
-                    name = "Krzesło",
-                    leadTime = 2,
-                    inStock = 48
-                )
+                name = "Krzesło",
+                leadTime = 2,
+                inStock = 48
             )
             mrpRepository.insertProduct(
-                MutableProductTreeNode(
-                    name = "Stół",
-                    leadTime = 3,
-                    inStock = 21
-                )
+                name = "Stół",
+                leadTime = 3,
+                inStock = 21
             )
             mrpRepository.insertProduct(
-                MutableProductTreeNode(
-                    name = "Szafka",
-                    leadTime = 5,
-                    inStock = 17
-                )
+                name = "Szafka",
+                leadTime = 5,
+                inStock = 17
             )
-            /* TODO replace placeholder values */
             mrpRepository.insertProduct(
-                MutableProductTreeNode(
-                    name = "Drzwi",
-                    leadTime = 1,
-                    batchSize = 1,
-                    inStock = 1,
-                    bom = 0,
-                    components = mutableListOf(
-                        MutableProductTreeNode(
-                            name = "Panel drzwiowy",
-                            leadTime = 1,
-                            batchSize = 1,
-                            inStock = 1,
-                            bom = 1,
-                            components = mutableListOf(
-                                MutableProductTreeNode(
-                                    name = "Płyta drewniana",
-                                    leadTime = 1,
-                                    batchSize = 1,
-                                    inStock = 1,
-                                    bom = 2,
-                                    components = mutableListOf()
-                                ),
-                                MutableProductTreeNode(
-                                    name = "Klamka",
-                                    leadTime = 1,
-                                    batchSize = 1,
-                                    inStock = 1,
-                                    bom = 2,
-                                    components = mutableListOf()
-                                ),
-                                MutableProductTreeNode(
-                                    name = "Szyba",
-                                    leadTime = 1,
-                                    batchSize = 1,
-                                    inStock = 1,
-                                    bom = 2,
-                                    components = mutableListOf()
-                                )
-                            )
-                        ),
-                        MutableProductTreeNode(
-                            name = "Framuga",
-                            leadTime = 1,
-                            batchSize = 1,
-                            inStock = 1,
-                            bom = 1,
-                            components = mutableListOf(
-                                MutableProductTreeNode(
-                                    name = "Listwa",
-                                    requiredAmount = 3,
-                                    leadTime = 1,
-                                    batchSize = 1,
-                                    inStock = 1,
-                                    bom = 2,
-                                    components = mutableListOf()
-                                )
-                            )
-                        ),
-                        MutableProductTreeNode(
-                            name = "Zawiasy",
-                            requiredAmount = 2,
-                            leadTime = 1,
-                            batchSize = 1,
-                            inStock = 1,
-                            bom = 1,
-                            components = mutableListOf()
-                        )
+                name = "Drzwi",
+                leadTime = 2,
+                inStock = 48,
+                components = listOf(
+                    Component(
+                        name = "Panel drzwiowy",
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 1
+                    ),
+                    Component(
+                        name = "Płyta drewniana",
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 2
+                    ),
+                    Component(
+                        name = "Klamka",
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 2
+                    ),
+                    Component(
+                        name = "Szyba",
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 2
+                    ),
+                    Component(
+                        name = "Framuga",
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 1
+                    ),
+                    Component(
+                        name = "Listwa",
+                        requiredAmount = 3,
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 2
+                    ),
+                    Component(
+                        name = "Zawiasy",
+                        requiredAmount = 2,
+                        leadTime = 1,
+                        batchSize = 1,
+                        inStock = 1,
+                        bom = 1
                     )
                 )
             )

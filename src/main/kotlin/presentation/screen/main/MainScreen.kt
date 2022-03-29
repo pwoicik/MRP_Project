@@ -1,8 +1,6 @@
 package presentation.screen.main
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.unit.dp
 import presentation.components.Divider
@@ -23,7 +21,7 @@ fun MainScreen(
     MainScaffold {
         ProductsFragment(
             products = state.products,
-            onAddProductClick = { navController.navigate(ScreenConfig.CreateComponent()) },
+            onAddProductClick = { navController.navigate(ScreenConfig.CreateProduct()) },
             onProductClick = { viewModel.emit(MainScreenEvent.ProductSelected(it)) }
         )
         Divider(
@@ -31,11 +29,16 @@ fun MainScreen(
             tonalElevation = 2.dp,
             shadowElevation = 2.dp
         )
+        val selectedProduct by derivedStateOf { state.selectedProduct }
         DetailsFragment(
-            product = state.selectedProduct,
-            onEditProduct = { navController.navigate(ScreenConfig.CreateComponent(it.id)) },
+            product = selectedProduct,
+            onEditProduct = { navController.navigate(ScreenConfig.CreateProduct(it.id)) },
             onDeleteProduct = { viewModel.emit(MainScreenEvent.DeleteProduct(it)) },
-            onRunMrp = { navController.navigate(ScreenConfig.Mrp(it.id)) }
+            onAddComponent = { viewModel.emit(MainScreenEvent.AddComponent) },
+            onRunMrp = { navController.navigate(ScreenConfig.Mrp(it.id)) },
+            onDeleteComponent = { viewModel.emit(MainScreenEvent.DeleteComponent(it)) },
+            onEditComponent = { viewModel.emit(MainScreenEvent.EditComponent(it)) },
+            onAddSubcomponent = { viewModel.emit(MainScreenEvent.AddSubcomponent(it)) }
         )
     }
 }

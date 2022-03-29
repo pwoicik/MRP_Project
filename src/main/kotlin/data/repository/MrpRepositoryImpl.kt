@@ -4,8 +4,8 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import data.MrpDatabase
-import data.entity.ProductTree
-import domain.model.MutableProductTreeNode
+import data.entity.ProductEntity
+import domain.model.Component
 import domain.repository.MrpRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -20,19 +20,24 @@ class MrpRepositoryImpl(
         db.productQueries.deleteProduct(productId)
     }
 
-    override fun getAllProducts(): Flow<List<ProductTree>> {
+    override fun getAllProducts(): Flow<List<ProductEntity>> {
         return db.productQueries.getAllProducts().asFlow().mapToList(dbCoroutineDispatcher)
     }
 
-    override fun getProduct(productId: Long): Flow<ProductTree> {
+    override fun getProduct(productId: Long): Flow<ProductEntity> {
         return db.productQueries.getProduct(productId).asFlow().mapToOne(dbCoroutineDispatcher)
     }
 
-    override suspend fun insertProduct(product: MutableProductTreeNode) = withContext(dbCoroutineDispatcher) {
-        db.productQueries.insertProduct(product)
+    override suspend fun insertProduct(
+        name: String,
+        leadTime: Long,
+        inStock: Long,
+        components: List<Component>
+    ) = withContext(dbCoroutineDispatcher) {
+        db.productQueries.insertProduct(name, leadTime, inStock, components)
     }
 
-    override suspend fun updateProduct(productTree: ProductTree) = withContext(dbCoroutineDispatcher) {
+    override suspend fun updateProduct(productTree: ProductEntity) = withContext(dbCoroutineDispatcher) {
         db.productQueries.updateProduct(productTree)
     }
 }

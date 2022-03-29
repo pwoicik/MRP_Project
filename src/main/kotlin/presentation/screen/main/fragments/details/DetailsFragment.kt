@@ -2,9 +2,13 @@ package presentation.screen.main.fragments.details
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.VerticalScrollbar
+import androidx.compose.foundation.defaultScrollbarStyle
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -17,8 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import data.entity.ProductTree
-import domain.model.MutableProductTreeNode
+import data.entity.ProductEntity
+import domain.model.Component
 import presentation.components.Divider
 import presentation.components.IconButton
 import presentation.screen.main.components.ComponentDetail
@@ -28,10 +32,14 @@ import presentation.screen.main.fragments.MainFragment
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RowScope.DetailsFragment(
-    product: ProductTree?,
-    onEditProduct: (ProductTree) -> Unit,
-    onDeleteProduct: (ProductTree) -> Unit,
-    onRunMrp: (ProductTree) -> Unit
+    product: ProductEntity?,
+    onEditProduct: (ProductEntity) -> Unit,
+    onDeleteProduct: (ProductEntity) -> Unit,
+    onAddComponent: (ProductEntity) -> Unit,
+    onAddSubcomponent: (Component) -> Unit,
+    onEditComponent: (Component) -> Unit,
+    onDeleteComponent: (Component) -> Unit,
+    onRunMrp: (ProductEntity) -> Unit
 ) {
     MainFragment {
         Crossfade(product) { product ->
@@ -45,7 +53,7 @@ fun RowScope.DetailsFragment(
             } else {
                 Column {
                     MainFragmentTopBar(
-                        title = product.node.name,
+                        title = product.name,
                         actions = {
                             CompositionLocalProvider(
                                 LocalContentColor provides MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
@@ -76,29 +84,53 @@ fun RowScope.DetailsFragment(
                     ) {
                         ComponentDetail(
                             detail = "czas produkcji",
-                            value = product.node.leadTime
+                            value = product.leadTime
                         )
                         ComponentDetail(
                             detail = "na stanie",
-                            value = product.node.inStock
-                        )
-                        ComponentDetail(
-                            detail = "batch size",
-                            value = product.node.batchSize
+                            value = product.inStock
                         )
                     }
+
                     TextButton(
-                        onClick = {},
+                        onClick = { onAddComponent(product) },
                         modifier = Modifier.padding(start = 4.dp)
                     ) { Text("Dodaj komponent") }
-                    LazyColumn(
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 500.dp
-                        )
-                    ) {
-                        product.node.components.forEach(::componentsListItem)
+
+                    val components = product.components
+                    if (components.isEmpty()) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text("Brak komponentów")
+                        }
+                    } else {
+                        Row {
+                            val state = rememberLazyListState()
+                            LazyColumn(
+                                state = state,
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                items(components) { component ->
+                                    ComponentListItem(
+                                        component = component,
+                                        onEditComponent = { onEditComponent(component) },
+                                        onDeleteComponent = { onDeleteComponent(component) },
+                                        onAddComponent = { onAddSubcomponent(component) }
+                                    )
+                                }
+                            }
+                            VerticalScrollbar(
+                                adapter = rememberScrollbarAdapter(state),
+                                style = defaultScrollbarStyle().copy(
+                                    unhoverColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    hoverColor = MaterialTheme.colorScheme.surfaceVariant
+                                ),
+                                modifier = Modifier.padding(horizontal = 4.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -106,10 +138,16 @@ fun RowScope.DetailsFragment(
     }
 }
 
-fun LazyListScope.componentsListItem(component: MutableProductTreeNode) {
-    val indentLevel = component.bom.toInt() - 1
-    val startIndent = 40.dp * indentLevel
-    item {
+@Composable
+fun ComponentListItem(
+    component: Component,
+    onEditComponent: () -> Unit,
+    onDeleteComponent: () -> Unit,
+    onAddComponent: () -> Unit
+) {
+    Column {
+        val indentLevel = component.bom.toInt() - 1
+        val startIndent = 40.dp * indentLevel
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.height(IntrinsicSize.Min)
@@ -134,16 +172,30 @@ fun LazyListScope.componentsListItem(component: MutableProductTreeNode) {
             Box {
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(component.name)
+                        Text(
+                            text = component.name,
+                            modifier = Modifier.weight(1f)
+                        )
 
+                        IconButton(
+                            icon = Icons.Default.Edit,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            size = 20.dp,
+                            onClick = onEditComponent
+                        )
+                        IconButton(
+                            icon = Icons.Default.Delete,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            size = 20.dp,
+                            onClick = onDeleteComponent
+                        )
                         IconButton(
                             icon = Icons.Default.Add,
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            onClick = {}
+                            onClick = onAddComponent
                         )
                     }
                     Row(
@@ -171,11 +223,6 @@ fun LazyListScope.componentsListItem(component: MutableProductTreeNode) {
                 }
             }
         }
-    }
-    item {
         Divider(startIndent = startIndent, tonalElevation = 2.dp)
-    }
-    for (child in component.components) {
-        componentsListItem(child)
     }
 }

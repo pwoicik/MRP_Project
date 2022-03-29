@@ -34,6 +34,7 @@ fun ColumnScope.Divider(
     thickness: Dp = 1.dp,
     tonalElevation: Dp = 1.dp,
     shadowElevation: Dp = 0.dp,
+    startIndent: Dp = 0.dp,
     color: Color = MaterialTheme.colorScheme.surface
 ) {
     Surface(
@@ -43,6 +44,7 @@ fun ColumnScope.Divider(
         modifier = Modifier
             .fillMaxWidth()
             .height(thickness)
+            .padding(start = startIndent)
     ) { }
 }
 

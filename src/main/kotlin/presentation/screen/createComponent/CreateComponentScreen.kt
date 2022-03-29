@@ -1,4 +1,4 @@
-package presentation.screen.createProduct
+package presentation.screen.createComponent
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -15,14 +15,14 @@ import presentation.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProductScreen(
-    viewModel: CreateProductViewModel,
+fun CreateComponentScreen(
+    viewModel: CreateComponentViewModel,
     navController: NavController
 ) {
     val state by viewModel.state.collectAsState()
 
     val onSubmit = {
-        viewModel.emit(CreateProductEvent.SaveProduct)
+        viewModel.emit(CreateComponentEvent.SaveComponent)
         navController.navigateUp()
     }
 
@@ -39,7 +39,7 @@ fun CreateProductScreen(
                     .widthIn(max = 500.dp)
             ) {
                 CenterAlignedTopAppBar(
-                    title = { Text(if (viewModel.isEditMode) "Edytuj produkt" else "Stwórz produkt") },
+                    title = { Text(if (viewModel.isEditMode) "Edytuj komponent" else "Stwórz komponent") },
                     actions = {
                         IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
@@ -57,7 +57,7 @@ fun CreateProductScreen(
                 EditComponentTextField(
                     value = state.name,
                     isError = state.name.isBlank(),
-                    onValueChange = { viewModel.emit(CreateProductEvent.NameChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.NameChanged(it)) },
                     onSubmit = onSubmit,
                     label = "nazwa",
                     modifier = Modifier.focusRequester(focusRequester)
@@ -65,7 +65,7 @@ fun CreateProductScreen(
                 EditComponentTextField(
                     value = state.leadTime,
                     isError = state.leadTime.isBlank(),
-                    onValueChange = { viewModel.emit(CreateProductEvent.LeadTimeChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.LeadTimeChanged(it)) },
                     onSubmit = onSubmit,
                     label = "czas produkcji",
                     isNumeric = true
@@ -73,9 +73,25 @@ fun CreateProductScreen(
                 EditComponentTextField(
                     value = state.inStock,
                     isError = state.inStock.isBlank(),
-                    onValueChange = { viewModel.emit(CreateProductEvent.InStockChanged(it)) },
+                    onValueChange = { viewModel.emit(CreateComponentEvent.InStockChanged(it)) },
                     onSubmit = onSubmit,
                     label = "na stanie",
+                    isNumeric = true
+                )
+                EditComponentTextField(
+                    value = state.batchSize,
+                    isError = state.batchSize.isBlank(),
+                    onValueChange = { viewModel.emit(CreateComponentEvent.BatchSizeChanged(it)) },
+                    onSubmit = onSubmit,
+                    label = "rozmiar partii",
+                    isNumeric = true
+                )
+                EditComponentTextField(
+                    value = state.requiredAmount,
+                    isError = state.requiredAmount.isBlank(),
+                    onValueChange = { viewModel.emit(CreateComponentEvent.RequiredAmountChanged(it)) },
+                    onSubmit = onSubmit,
+                    label = "wymagana ilość",
                     isNumeric = true
                 )
 

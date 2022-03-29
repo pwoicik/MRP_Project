@@ -1,31 +1,35 @@
-import domain.model.MutableProductTreeNode;
+import kotlin.collections.List;
+import domain.model.Component;
 
-CREATE TABLE productTree (
+CREATE TABLE productEntity (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    node TEXT AS MutableProductTreeNode NOT NULL
+    name TEXT NOT NULL,
+    leadTime INTEGER NOT NULL,
+    inStock INTEGER NOT NULL,
+    components TEXT AS List<Component> NOT NULL
 );
 
 deleteProduct:
 DELETE
-FROM productTree
+FROM productEntity
 WHERE id = ?;
 
 getAllProducts:
 SELECT *
-FROM productTree
+FROM productEntity
 ORDER BY id DESC;
 
 getProduct:
 SELECT *
-FROM productTree
+FROM productEntity
 WHERE id = ?;
 
 insertProduct:
 INSERT
-INTO productTree(node)
-VALUES (?);
+INTO productEntity(name, leadTime, inStock, components)
+VALUES (?, ?, ?, ?);
 
 updateProduct:
 INSERT OR REPLACE
-INTO productTree
+INTO productEntity
 VALUES ?;

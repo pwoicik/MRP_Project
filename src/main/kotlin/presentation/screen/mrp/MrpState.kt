@@ -1,7 +1,9 @@
 package presentation.screen.mrp
 
-import domain.model.MutableProductTreeNode
+import androidx.compose.runtime.Immutable
+import data.entity.ProductEntity
 
+@Immutable
 data class MrpState(
-    val product: MutableProductTreeNode? = null
+    val product: ProductEntity? = null
 )

@@ -26,7 +26,7 @@ class MrpViewModel(
         viewModelScope.launch {
             val product = repository.getProduct(productId).first()
             _state.update {
-                it.copy(product = product.node)
+                it.copy(product = product)
             }
         }
     }
