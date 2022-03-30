@@ -74,7 +74,7 @@ compose.desktop {
 
             targetFormats(TargetFormat.Msi)
             packageName = "MRP Project"
-            packageVersion = "0.0.2"
+            packageVersion = "0.0.3"
 
             windows {
                 iconFile.set(project.layout.projectDirectory.dir("icons").file("icon.ico"))

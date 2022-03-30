@@ -1,6 +1,7 @@
 package presentation.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.LocalContentColor
@@ -20,6 +21,7 @@ fun TopBar(
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     tonalElevation: Dp = 0.dp,
     shadowElevation: Dp = 0.dp,
+    navigationIcon: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -27,16 +29,18 @@ fun TopBar(
         tonalElevation = tonalElevation,
         shadowElevation = shadowElevation
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(70.dp)
         ) {
+            Box(modifier = Modifier.weight(1f)) { navigationIcon() }
             CompositionLocalProvider(
                 LocalContentColor provides contentColor,
                 content = content
             )
+            Box(modifier = Modifier.weight(1f))
         }
     }
 }

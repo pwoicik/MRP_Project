@@ -35,7 +35,7 @@ class MrpApplication : KoinComponent {
             mrpRepository.insertProduct(
                 name = "Drzwi",
                 leadTime = 2,
-                inStock = 48,
+                inStock = 20,
                 components = listOf(
                     Component(
                         name = "Panel drzwiowy",
