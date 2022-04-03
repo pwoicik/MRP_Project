@@ -40,22 +40,22 @@ class MrpApplication : KoinComponent {
                     Component(
                         name = "Panel drzwiowy",
                         leadTime = 1,
-                        batchSize = 1,
-                        inStock = 1,
+                        batchSize = 10,
+                        inStock = 20,
                         bom = 1
                     ),
                     Component(
                         name = "Płyta drewniana",
-                        leadTime = 1,
-                        batchSize = 1,
-                        inStock = 1,
+                        leadTime = 2,
+                        batchSize = 20,
+                        inStock = 10,
                         bom = 2
                     ),
                     Component(
                         name = "Klamka",
-                        leadTime = 1,
-                        batchSize = 1,
-                        inStock = 1,
+                        leadTime = 3,
+                        batchSize = 40,
+                        inStock = 40,
                         bom = 2
                     ),
                     Component(

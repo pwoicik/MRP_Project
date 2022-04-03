@@ -1,10 +1,11 @@
 package presentation.screen.mrp
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
@@ -18,18 +19,23 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import domain.model.GHP
+import domain.model.MRP
 import presentation.components.IconButton
 import presentation.components.TopBar
 import presentation.navigation.NavController
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MrpScreen(
     viewModel: MrpViewModel,
@@ -51,10 +57,22 @@ fun MrpScreen(
                 }
             ) {
                 state.product?.let {
-                    Text(
-                        text = it.name,
-                        style = MaterialTheme.typography.headlineMedium
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    ) {
+                        Text(
+                            text = it.name,
+                            style = MaterialTheme.typography.displayMedium
+                        )
+                        Column {
+                            ProvideTextStyle(LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)) {
+                                Text("na stanie: ${it.inStock}")
+                                Text("czas produkcji: ${it.leadTime}")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -66,80 +84,48 @@ fun MrpScreen(
             when (isFetching) {
                 true -> {}
                 false -> {
-                    val ghp = state.ghp!!
-                    LazyColumn(
-                        contentPadding = PaddingValues(32.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        stickyHeader {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    Column(modifier = Modifier) {
+                        val horizontalScrollState = rememberScrollState()
+                        Row(modifier = Modifier.weight(1f)) {
+                            val lazyListState = rememberLazyListState()
+                            LazyColumn(
+                                state = lazyListState,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .horizontalScroll(horizontalScrollState)
                             ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.Bottom
-                                ) {
-                                    Text(
-                                        text = "GHP",
-                                        style = MaterialTheme.typography.displaySmall
-                                    )
-                                    state.product?.let {
-                                        Text("(na stanie: ${it.inStock};  czas produkcji: ${it.leadTime})")
-                                    }
-                                }
+                                ghp(
+                                    ghp = state.ghp!!,
+                                    onDemandChange = viewModel::demandChanged,
+                                    onProductionChange = viewModel::productionChanged
+                                )
 
-                                Surface(tonalElevation = 2.dp) {
-                                    Row {
-                                        TableHeader(text = "tydzień", textAlign = TextAlign.End)
-                                        (1..ghp.entries.size).forEach {
-                                            TableTextCell(
-                                                text = it.toString(),
-                                                textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        item {
-                            TableRow(headerText = "przewidywany popyt") {
-                                ghp.entries.forEachIndexed { entryIndex, entry ->
-                                    TableTextFieldCell(
-                                        value = when (val av = entry.demand) {
-                                            0 -> ""
-                                            else -> av.toString()
-                                        },
-                                        onValueChange = { viewModel.demandChanged(index = entryIndex, newValue = it) }
-                                    )
-                                }
-                            }
-                        }
-                        item {
-                            TableRow(headerText = "produkcja") {
-                                ghp.entries.forEachIndexed { entryIndex, entry ->
-                                    TableTextFieldCell(
-                                        value = when (val prod = entry.production) {
-                                            0 -> ""
-                                            else -> prod.toString()
-                                        },
-                                        onValueChange = {
-                                            viewModel.productionChanged(
-                                                index = entryIndex,
-                                                newValue = it
-                                            )
+                                state.mrps!!.forEachIndexed { idx, mrp ->
+                                    item { Spacer(Modifier.height(128.dp)) }
+                                    mrp(
+                                        mrp = mrp,
+                                        onScheduledReceiptsChange = { entryIdx, newValue ->
+                                            viewModel.scheduledReceiptsChanged(idx, entryIdx, newValue)
                                         }
                                     )
                                 }
                             }
+                            VerticalScrollbar(
+                                adapter = rememberScrollbarAdapter(lazyListState),
+                                style = LocalScrollbarStyle.current.copy(
+                                    unhoverColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    hoverColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
                         }
-                        item {
-                            TableRow(headerText = "dostępne") {
-                                ghp.entries.forEach {
-                                    TableTextCell(it.availableAmount.toString())
-                                }
-                            }
-                        }
+                        HorizontalScrollbar(
+                            adapter = rememberScrollbarAdapter(horizontalScrollState),
+                            style = LocalScrollbarStyle.current.copy(
+                                unhoverColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                hoverColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        )
                     }
                 }
             }
@@ -147,60 +133,188 @@ fun MrpScreen(
     }
 }
 
-@Composable
-fun TableRow(
-    headerText: String,
-    content: @Composable RowScope.() -> Unit
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyListScope.ghp(
+    ghp: GHP,
+    onDemandChange: (index: Int, newValue: String) -> Unit,
+    onProductionChange: (index: Int, newValue: String) -> Unit
 ) {
-    Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-        TableHeader(headerText)
-        content()
+    stickyHeader {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+        ) {
+            Text(
+                text = "GHP",
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier.padding(vertical = 24.dp, horizontal = 48.dp)
+            )
+        }
+    }
+
+    item {
+        TableLayout(
+            nColumns = ghp.entries.size + 1,
+            modifier = Modifier.border(2.dp, MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            TableHeader(text = "tydzień", textAlign = TextAlign.End)
+            (1..ghp.entries.size).forEach {
+                TableHeader(it.toString(), textAlign = TextAlign.Center)
+            }
+
+            TableHeader("przewidywany popyt")
+            ghp.entries.forEachIndexed { idx, entry ->
+                TableTextFieldCell(
+                    value = when (val av = entry.demand) {
+                        0 -> ""
+                        else -> av.toString()
+                    },
+                    onValueChange = { onDemandChange(idx, it) }
+                )
+            }
+
+            TableHeader("produkcja")
+            ghp.entries.forEachIndexed { idx, entry ->
+                TableTextFieldCell(
+                    value = when (val prod = entry.production) {
+                        0 -> ""
+                        else -> prod.toString()
+                    },
+                    onValueChange = { onProductionChange(idx, it) }
+                )
+            }
+
+            TableHeader("dostępne")
+            ghp.entries.forEach {
+                TableTextCell(it.availableAmount.toString())
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+fun LazyListScope.mrp(
+    mrp: MRP,
+    onScheduledReceiptsChange: (entryIdx: Int, newValue: String) -> Unit
+) {
+    stickyHeader {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+        ) {
+            Text(
+                text = "MRP",
+                style = MaterialTheme.typography.displaySmall,
+                modifier = Modifier.padding(vertical = 24.dp, horizontal = 48.dp)
+            )
+        }
+    }
+
+    item {
+        TableLayout(
+            nColumns = mrp.entries.size + 1,
+            modifier = Modifier.border(2.dp, MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Surface(tonalElevation = 2.dp) {
+                TableCell {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ProvideTextStyle(LocalTextStyle.current.copy(fontWeight = FontWeight.Bold)) {
+                            Text(
+                                text = "okres",
+                                textAlign = TextAlign.End,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Text(
+                                text = "dane produkcyjne",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .width(IntrinsicSize.Max)
+                                    .padding(end = 24.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            (1..mrp.entries.size).forEach {
+                TableHeader(it.toString(), textAlign = TextAlign.Center)
+            }
+
+            TableHeader("całkowite zapotrzebowanie")
+            mrp.entries.forEach {
+                TableTextCell(it.grossRequirements.toString())
+            }
+
+            TableHeader("planowane przyjęcia")
+            mrp.entries.forEachIndexed { idx, entry ->
+                TableTextFieldCell(
+                    value = entry.scheduledReceipts.toString(),
+                    onValueChange = { onScheduledReceiptsChange(idx, it) }
+                )
+            }
+
+            TableHeader("przewidywane na stanie")
+            mrp.entries.forEach {
+                TableTextCell(it.predictedOnHand.toString())
+            }
+
+            TableHeader("zapotrzebowanie netto")
+            mrp.entries.forEach {
+                TableTextCell(it.netRequirements.toString())
+            }
+
+            TableHeader("planowane zamówienia")
+            mrp.entries.forEach {
+                TableTextCell(it.plannedOrderReleases.toString())
+            }
+
+            TableHeader("planowane przyjęcie zamówień")
+            mrp.entries.forEach {
+                TableTextCell(it.plannedOrderReceipts.toString())
+            }
+        }
     }
 }
 
 @Composable
-fun RowScope.TableCell(
-    weight: Float = 1f,
-    content: @Composable () -> Unit
+fun TableHeader(
+    text: String,
+    textAlign: TextAlign = TextAlign.Start
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant)
-            .fillMaxHeight()
-            .weight(weight)
-            .padding(16.dp)
-    ) {
-        content()
+    Surface(tonalElevation = 2.dp) {
+        TableTextCell(
+            text = text,
+            textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
+            textAlign = textAlign
+        )
     }
 }
 
 @Composable
-fun RowScope.TableTextCell(
+fun TableTextCell(
     text: String,
     textStyle: TextStyle = LocalTextStyle.current,
-    textAlign: TextAlign = TextAlign.Center,
-    weight: Float = 1f
+    textAlign: TextAlign = TextAlign.Center
 ) {
-    TableCell(weight = weight) {
+    TableCell {
         Text(
             text = text,
             style = textStyle,
             textAlign = textAlign,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .width(IntrinsicSize.Max)
         )
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RowScope.TableTextFieldCell(
+fun TableTextFieldCell(
     value: String,
-    onValueChange: (String) -> Unit,
-    weight: Float = 1f
+    onValueChange: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    TableCell(weight = weight) {
+    TableCell {
         TextField(
             value = TextFieldValue(value, selection = TextRange(value.length, value.length)),
             onValueChange = { onValueChange(it.text) },
@@ -211,36 +325,98 @@ fun RowScope.TableTextFieldCell(
                 cursorColor = MaterialTheme.colorScheme.secondary
             ),
             textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            modifier = Modifier.onKeyEvent {
-                if (it.type == KeyEventType.KeyUp) {
-                    when (it.key) {
-                        Key.Tab -> focusManager.moveFocus(
-                            if (it.isShiftPressed) FocusDirection.Left else FocusDirection.Right
-                        )
-                        Key.Enter -> focusManager.moveFocus(
-                            if (it.isShiftPressed) FocusDirection.Up else FocusDirection.Down
-                        )
-                        Key.DirectionLeft -> focusManager.moveFocus(FocusDirection.Left)
-                        Key.DirectionRight -> focusManager.moveFocus(FocusDirection.Right)
-                        Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
-                        Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
+            modifier = Modifier
+                .widthIn(max = 128.dp)
+                .onKeyEvent {
+                    if (it.type == KeyEventType.KeyUp) {
+                        when (it.key) {
+                            Key.Tab -> focusManager.moveFocus(
+                                if (it.isShiftPressed) FocusDirection.Left else FocusDirection.Right
+                            )
+                            Key.Enter -> focusManager.moveFocus(
+                                if (it.isShiftPressed) FocusDirection.Up else FocusDirection.Down
+                            )
+                            else -> {
+                                if (!it.isCtrlPressed) return@onKeyEvent false
+                                when (it.key) {
+                                    Key.DirectionLeft -> focusManager.moveFocus(FocusDirection.Left)
+                                    Key.DirectionRight -> focusManager.moveFocus(FocusDirection.Right)
+                                    Key.DirectionUp -> focusManager.moveFocus(FocusDirection.Up)
+                                    Key.DirectionDown -> focusManager.moveFocus(FocusDirection.Down)
+                                }
+                            }
+                        }
                     }
+                    false
                 }
-                true
-            }
         )
     }
 }
 
 @Composable
-fun RowScope.TableHeader(
-    text: String,
-    textAlign: TextAlign = TextAlign.Start
+fun TableCell(content: @Composable () -> Unit) {
+    Box(
+        contentAlignment = Alignment.CenterStart,
+        modifier = Modifier
+            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant)
+            .padding(16.dp)
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun TableLayout(
+    nColumns: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
 ) {
-    TableTextCell(
-        text = text,
-        textStyle = LocalTextStyle.current.copy(fontWeight = FontWeight.Bold),
-        textAlign = textAlign,
-        weight = 2f
-    )
+    Layout(
+        content = content,
+        modifier = modifier
+    ) { measurables, constraints ->
+        val nRows = measurables.size / nColumns
+
+        val measurableColumns = List(nColumns) { x ->
+            List(nRows) { y ->
+                measurables[y * nColumns + x]
+            }
+        }
+
+        var columnWidths = measurableColumns.map { column ->
+            column.maxOf { it.minIntrinsicWidth(Constraints.Infinity) }
+        }
+
+        val rowHeight = measurableColumns.mapIndexed { x, col ->
+            col.maxOf { it.minIntrinsicHeight(columnWidths[x]) }
+        }.maxOf { it }
+
+        columnWidths = columnWidths.map { it.coerceAtLeast(rowHeight) }
+
+        val placeableColumns = measurableColumns.mapIndexed { x, col ->
+            col.map { measurable ->
+                measurable.measure(
+                    constraints.copy(
+                        minWidth = columnWidths[x],
+                        maxWidth = columnWidths[x],
+                        minHeight = rowHeight,
+                        maxHeight = rowHeight
+                    )
+                )
+            }
+        }
+
+        layout(columnWidths.sum(), rowHeight * nRows) {
+            var x = 0
+
+            placeableColumns.forEachIndexed { i, column ->
+                var y = 0
+                for (placeable in column) {
+                    placeable.placeRelative(x, y)
+                    y += rowHeight
+                }
+                x += columnWidths[i]
+            }
+        }
+    }
 }

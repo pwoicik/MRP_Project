@@ -1,9 +1,6 @@
 package presentation.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,7 +30,7 @@ fun TopBar(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
+                .heightIn(min = 70.dp)
         ) {
             Box(modifier = Modifier.weight(1f)) { navigationIcon() }
             CompositionLocalProvider(

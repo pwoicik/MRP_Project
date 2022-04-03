@@ -10,5 +10,5 @@ data class MrpState(
 
     val product: ProductEntity? = null,
     val ghp: GHP? = null,
-    val mrps: List<List<MRP>>? = null
+    val mrps: List<MRP>? = null
 )
