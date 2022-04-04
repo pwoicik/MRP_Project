@@ -19,6 +19,7 @@ import presentation.navigation.NavController
 import presentation.navigation.ScreenConfig
 import presentation.navigation.ViewModel
 import java.util.Stack
+import kotlin.math.ceil
 import kotlin.time.Duration.Companion.seconds
 
 class MrpViewModel(
@@ -108,13 +109,33 @@ class MrpViewModel(
             }
         }
 
-        // Predicted on hand
-        run {
-            val debt = ghp.entries.subList(0, ghp.leadTime).sumOf(GHPEntry::production)
-            val a = entries.subList(0, ghp.leadTime)
-            for (i in 0..a.lastIndex) {
-                a[i] = a[i].copy(predictedOnHand = a[i].predictedOnHand - debt)
+        entries.forEachIndexed { index, entry ->
+            var predictedOnHand = 0
+            var netRequirements = 0
+            var plannedOrderReceipts = 0
+
+            val prev = entries.getOrElse(index - 1) {
+                MRPEntry(
+                    predictedOnHand = mrp.onHand -
+                            parent.entries.subList(0, parent.leadTime).sumOf(GHPEntry::production)
+                )
             }
+
+            predictedOnHand = prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts
+            netRequirements = (entry.grossRequirements - prev.predictedOnHand).coerceAtLeast(0)
+            plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
+                .also {
+                    predictedOnHand += it
+
+                    val i = index - mrp.leadTime
+                    if (i >= 0) entries[i] = entries[i].copy(plannedOrderReleases = it)
+                }
+
+            entries[index] = entry.copy(
+                predictedOnHand = predictedOnHand,
+                netRequirements = netRequirements,
+                plannedOrderReceipts = plannedOrderReceipts
+            )
         }
 
         return mrp.copy(entries = entries)

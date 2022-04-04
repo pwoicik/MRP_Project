@@ -203,7 +203,7 @@ fun LazyListScope.mrp(
             modifier = Modifier.background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
         ) {
             Text(
-                text = "MRP",
+                text = "${mrp.name}  (${mrp.requiredAmount})",
                 style = MaterialTheme.typography.displaySmall,
                 modifier = Modifier.padding(vertical = 24.dp, horizontal = 48.dp)
             )
@@ -270,6 +270,14 @@ fun LazyListScope.mrp(
             TableHeader("planowane przyjęcie zamówień")
             mrp.entries.forEach {
                 TableTextCell(it.plannedOrderReceipts.toString())
+            }
+        }
+        Surface {
+            Row {
+                TableTextCell("Czas realizacji = ${mrp.leadTime}")
+                TableTextCell("Wielkość partii = ${mrp.batchSize}")
+                TableTextCell("Poziom BOM = ${mrp.bom}")
+                TableTextCell("Na stanie = ${mrp.onHand}")
             }
         }
     }
