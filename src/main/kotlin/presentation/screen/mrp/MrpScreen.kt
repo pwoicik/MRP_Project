@@ -241,13 +241,16 @@ fun LazyListScope.mrp(
 
             TableHeader("całkowite zapotrzebowanie")
             mrp.entries.forEach {
-                TableTextCell(it.grossRequirements.toString())
+                TableTextCell(it.grossRequirements.if0thenEmpty())
             }
 
             TableHeader("planowane przyjęcia")
             mrp.entries.forEachIndexed { idx, entry ->
                 TableTextFieldCell(
-                    value = entry.scheduledReceipts.toString(),
+                    value = when (val av = entry.scheduledReceipts) {
+                        0 -> ""
+                        else -> av.toString()
+                    },
                     onValueChange = { onScheduledReceiptsChange(idx, it) }
                 )
             }
@@ -259,17 +262,17 @@ fun LazyListScope.mrp(
 
             TableHeader("zapotrzebowanie netto")
             mrp.entries.forEach {
-                TableTextCell(it.netRequirements.toString())
+                TableTextCell(it.netRequirements.if0thenEmpty())
             }
 
             TableHeader("planowane zamówienia")
             mrp.entries.forEach {
-                TableTextCell(it.plannedOrderReleases.toString())
+                TableTextCell(it.plannedOrderReleases.if0thenEmpty())
             }
 
             TableHeader("planowane przyjęcie zamówień")
             mrp.entries.forEach {
-                TableTextCell(it.plannedOrderReceipts.toString())
+                TableTextCell(it.plannedOrderReceipts.if0thenEmpty())
             }
         }
         Surface {
@@ -428,3 +431,5 @@ fun TableLayout(
         }
     }
 }
+
+private fun Int.if0thenEmpty() = if (this == 0) "" else this.toString()

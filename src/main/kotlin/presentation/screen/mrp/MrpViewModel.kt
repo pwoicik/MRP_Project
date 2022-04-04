@@ -48,6 +48,22 @@ class MrpViewModel(
     }
 
 
+    private var updateJob: Job? = null
+    private fun updateState() {
+        updateJob?.cancel()
+        if (state.value.ghp == null) return
+        updateJob = viewModelScope.launch(Dispatchers.Default) {
+            delay(0.5.seconds)
+            _state.update {
+                it.copy(
+                    ghp = calculateGHP(it.ghp!!),
+                    mrps = calculateMRPs(it.mrps!!, it.ghp)
+                )
+            }
+        }
+    }
+
+
     //region MRP
     private fun produceMRPs(product: ProductEntity, ghp: GHP): List<MRP> {
         val mrps = product.components.map { component ->
@@ -58,7 +74,7 @@ class MrpViewModel(
                 batchSize = component.batchSize.toInt(),
                 requiredAmount = component.requiredAmount.toInt(),
                 bom = component.bom.toInt(),
-                entries = List(10 - ghp.leadTime) { MRPEntry(predictedOnHand = component.inStock.toInt()) }
+                entries = List(10 - ghp.leadTime) { MRPEntry() }
             )
         }
 
@@ -79,7 +95,7 @@ class MrpViewModel(
                 mrps[i] = calculateMRP(mrp, ghp)
                 parentStack.push(mrp)
             } else {
-                val previous = mrps[i - 1]
+                val previous = parentStack.peek()
                 if (mrp.bom < previous.bom) parentStack.pop()
 
                 mrps[i] = calculateMRP(mrp, previous)
@@ -93,15 +109,17 @@ class MrpViewModel(
         return mrps
     }
 
-    private fun calculateMRP(mrp: MRP, ghp: GHP): MRP {
+    private fun calculateMRP(mrp: MRP, parent: GHP): MRP {
+        if (mrp.entries.isEmpty()) return mrp
+
         val entries = mrp.entries.toMutableList()
 
         // Gross requirements
         run {
-            for ((i, entry) in ghp.entries.withIndex()) {
+            for ((i, entry) in parent.entries.withIndex()) {
                 if (entry.production == 0) continue
 
-                val entyIdx = i - ghp.leadTime
+                val entyIdx = i - parent.leadTime
                 if (entyIdx < 0) continue
                 entries[entyIdx] = entries[entyIdx].copy(
                     grossRequirements = entry.production * mrp.requiredAmount
@@ -142,28 +160,50 @@ class MrpViewModel(
     }
 
     private fun calculateMRP(mrp: MRP, parent: MRP): MRP {
+        if (mrp.entries.isEmpty()) return mrp
+
         val entries = mrp.entries.toMutableList()
 
         // Gross requirements
         run {
             for ((i, entry) in parent.entries.withIndex()) {
-                if (entry.netRequirements == 0) continue
+                if (entry.scheduledReceipts == 0) continue
 
                 val entyIdx = i - parent.leadTime
                 if (entyIdx < 0) continue
                 entries[entyIdx] = entries[entyIdx].copy(
-                    grossRequirements = entry.netRequirements * mrp.requiredAmount
+                    grossRequirements = entry.scheduledReceipts * mrp.requiredAmount
                 )
             }
         }
 
-        // Predicted on hand
-        run {
-            val debt = parent.entries.subList(0, parent.leadTime).sumOf(MRPEntry::netRequirements)
-            val a = entries.subList(0, parent.leadTime)
-            for (i in 0..a.lastIndex) {
-                a[i] = a[i].copy(predictedOnHand = a[i].predictedOnHand - debt)
+        entries.forEachIndexed { index, entry ->
+            var predictedOnHand = 0
+            var netRequirements = 0
+            var plannedOrderReceipts = 0
+
+            val prev = entries.getOrElse(index - 1) {
+                MRPEntry(
+                    predictedOnHand = mrp.onHand -
+                            parent.entries.subList(0, parent.leadTime).sumOf(MRPEntry::scheduledReceipts)
+                )
             }
+
+            predictedOnHand = prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts
+            netRequirements = (entry.grossRequirements - prev.predictedOnHand).coerceAtLeast(0)
+            plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
+                .also {
+                    predictedOnHand += it
+
+                    val i = index - mrp.leadTime
+                    if (i >= 0) entries[i] = entries[i].copy(plannedOrderReleases = it)
+                }
+
+            entries[index] = entry.copy(
+                predictedOnHand = predictedOnHand,
+                netRequirements = netRequirements,
+                plannedOrderReceipts = plannedOrderReceipts
+            )
         }
 
         return mrp.copy(entries = entries)
@@ -211,18 +251,6 @@ class MrpViewModel(
         return ghp.copy(entries = entries)
     }
 
-    private var ghpCalcJob: Job? = null
-    private fun calculateGHP() {
-        ghpCalcJob?.cancel()
-        if (state.value.ghp == null) return
-        ghpCalcJob = viewModelScope.launch(Dispatchers.Default) {
-            delay(0.5.seconds)
-            _state.update {
-                it.copy(ghp = calculateGHP(it.ghp!!))
-            }
-        }
-    }
-
     private fun updateGHP(
         index: Int,
         newValue: String,
@@ -236,7 +264,7 @@ class MrpViewModel(
             entries[index] = updateFunction(entries[index], number)
             it.copy(ghp = it.ghp.copy(entries = entries))
         }
-        calculateGHP()
+        updateState()
     }
     //endregion
 
@@ -263,6 +291,7 @@ class MrpViewModel(
 
             it.copy(mrps = mrps)
         }
+        updateState()
     }
 
     fun demandChanged(index: Int, newValue: String) {
