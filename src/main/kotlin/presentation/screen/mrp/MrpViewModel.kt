@@ -87,21 +87,21 @@ class MrpViewModel(
         @Suppress("NAME_SHADOWING")
         val mrps = mrps.toMutableList()
 
-        val parentStack = Stack<MRP>()
+        val parentIdxStack = Stack<Int>()
         for (i in 0..mrps.lastIndex) {
             val mrp = mrps[i]
 
             if (mrp.bom == 1) {
                 mrps[i] = calculateMRP(mrp, ghp)
-                parentStack.push(mrp)
+                parentIdxStack.push(i)
             } else {
-                val previous = parentStack.peek()
-                if (mrp.bom < previous.bom) parentStack.pop()
+                if (mrp.bom < mrps[parentIdxStack.peek()].bom) parentIdxStack.pop()
+                val parent = mrps[parentIdxStack.peek()]
 
-                mrps[i] = calculateMRP(mrp, previous)
+                mrps[i] = calculateMRP(mrp, parent)
 
                 mrps.getOrNull(i + 1)?.let { next ->
-                    if (next.bom > mrp.bom) parentStack.push(mrp)
+                    if (next.bom > mrp.bom) parentIdxStack.push(i)
                 }
             }
         }
@@ -115,16 +115,12 @@ class MrpViewModel(
         val entries = mrp.entries.toMutableList()
 
         // Gross requirements
-        run {
-            for ((i, entry) in parent.entries.withIndex()) {
-                if (entry.production == 0) continue
-
-                val entyIdx = i - parent.leadTime
-                if (entyIdx < 0) continue
-                entries[entyIdx] = entries[entyIdx].copy(
-                    grossRequirements = entry.production * mrp.requiredAmount
-                )
-            }
+        for ((i, entry) in parent.entries.withIndex()) {
+            val entryIdx = i - parent.leadTime
+            if (entryIdx < 0) continue
+            entries[entryIdx] = entries[entryIdx].copy(
+                grossRequirements = entry.production * mrp.requiredAmount
+            )
         }
 
         entries.forEachIndexed { index, entry ->
@@ -139,12 +135,13 @@ class MrpViewModel(
                 )
             }
 
-            predictedOnHand = prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts
-            netRequirements = (entry.grossRequirements - prev.predictedOnHand).coerceAtLeast(0)
+            netRequirements =
+                (entry.grossRequirements - prev.predictedOnHand - entry.scheduledReceipts).coerceAtLeast(0)
+            plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
+            predictedOnHand =
+                prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts + plannedOrderReceipts
             plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
                 .also {
-                    predictedOnHand += it
-
                     val i = index - mrp.leadTime
                     if (i >= 0) entries[i] = entries[i].copy(plannedOrderReleases = it)
                 }
@@ -165,16 +162,12 @@ class MrpViewModel(
         val entries = mrp.entries.toMutableList()
 
         // Gross requirements
-        run {
-            for ((i, entry) in parent.entries.withIndex()) {
-                if (entry.scheduledReceipts == 0) continue
-
-                val entyIdx = i - parent.leadTime
-                if (entyIdx < 0) continue
-                entries[entyIdx] = entries[entyIdx].copy(
-                    grossRequirements = entry.scheduledReceipts * mrp.requiredAmount
-                )
-            }
+        for ((i, parentEntry) in parent.entries.withIndex()) {
+            val entryIdx = i
+            if (entryIdx < 0) continue
+            entries[entryIdx] = entries[entryIdx].copy(
+                grossRequirements = parentEntry.plannedOrderReleases * mrp.requiredAmount
+            )
         }
 
         entries.forEachIndexed { index, entry ->
@@ -182,19 +175,15 @@ class MrpViewModel(
             var netRequirements = 0
             var plannedOrderReceipts = 0
 
-            val prev = entries.getOrElse(index - 1) {
-                MRPEntry(
-                    predictedOnHand = mrp.onHand -
-                            parent.entries.subList(0, parent.leadTime).sumOf(MRPEntry::scheduledReceipts)
-                )
-            }
+            val prev = entries.getOrElse(index - 1) { MRPEntry(predictedOnHand = mrp.onHand) }
 
-            predictedOnHand = prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts
-            netRequirements = (entry.grossRequirements - prev.predictedOnHand).coerceAtLeast(0)
+            netRequirements =
+                (entry.grossRequirements - prev.predictedOnHand - entry.scheduledReceipts).coerceAtLeast(0)
+            plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
+            predictedOnHand =
+                prev.predictedOnHand - entry.grossRequirements + entry.scheduledReceipts + plannedOrderReceipts
             plannedOrderReceipts = (mrp.batchSize * ceil(netRequirements.toDouble() / mrp.batchSize).toInt())
                 .also {
-                    predictedOnHand += it
-
                     val i = index - mrp.leadTime
                     if (i >= 0) entries[i] = entries[i].copy(plannedOrderReleases = it)
                 }
